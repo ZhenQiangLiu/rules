@@ -20,6 +20,8 @@
 
 #include <signal.h>
 
+#include "_env.h"
+
 #include "app.h"
 #include "task.h"
 
@@ -32,6 +34,9 @@ static void app_daemon(void);
  * read user input
  * parse & save to app_conf
  * call main task()
+ *
+ * version 1.1.310117
+ * todo: getopt(), getopt_long()
  */
 int main(int argc, char **argv)
 {
@@ -51,6 +56,7 @@ int main(int argc, char **argv)
 	memset(&app_conf, 0, sizeof(app_conf));
 
 #ifdef USE_GETOPT
+	// verified by Qige @ 2017.01.31
 	int c = 0;
 	while((c = getopt(argc, argv, "Dvhdi:")) != -1) {
 		switch(c) {
@@ -76,7 +82,7 @@ int main(int argc, char **argv)
 #endif
 
 #ifdef USE_GETOPT_LONG
-
+	// todo: verify in gdbserver
 	for(;;) {
 		int option_index = 0, c = 0;
 		static struct option long_options[] = {
@@ -144,6 +150,10 @@ int main(int argc, char **argv)
 		return 0;
 	}
 
+	if (app_conf.flag.debug) {
+		app_version();
+	}
+
 	if (app_conf.flag.daemon) {
 		app_daemon();
 	}
@@ -152,6 +162,7 @@ int main(int argc, char **argv)
 	return ret;
 }
 
+// todo: verify with gdbserver
 // detach terminal
 // run in backgrund
 static void app_daemon(void)
@@ -194,6 +205,7 @@ static void app_daemon(void)
 	dup(0);
 }
 
+
 static void app_version(void)
 {
 	printf("%s\n(%s)\n", APP_DESC, APP_VERSION);
@@ -201,8 +213,12 @@ static void app_version(void)
 
 static void app_help(const char *app)
 {
-	printf("  usage: %s [-D|--daemon] [-i|--ifname ifname]\n", app);
-	printf("         %s [-d|--debug] [-v|--version|--ver] [-h|--help]\n", app);
-	//printf("  usage: %s [-D] [-i ifname]\n", app);
-	//printf("         %s [-d] [-v] [-h]\n", app);
+#ifdef USE_GETOPT
+	printf("  usage: %s [-D] [-i ifname]\n", app);
+	printf("         %s [-d] [-v] [-h]\n", app);
+#endif
+#ifdef USE_GETOPT_LONG
+	printf(" usage: %s [-D|--daemon] [-i|--ifname ifname]\n", app);
+	printf("        %s [-d|--debug] [-v|--version|--ver] [-h|--help]\n", app);
+#endif
 }

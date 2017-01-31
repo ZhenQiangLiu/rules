@@ -16,9 +16,6 @@ typedef unsigned char			uchar;
 typedef char					byte;
 typedef unsigned short 			ushort;
 
-//#define USE_GETOPT
-#define USE_GETOPT_LONG
-
 
 #define APP_DESC				("GWS Analog Baseband")
 #define APP_VERSION				("v0.0.310117. Buildtime: "__DATE__", "__TIME__)

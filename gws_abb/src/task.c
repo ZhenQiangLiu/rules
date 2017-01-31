@@ -10,12 +10,9 @@
 #include <stdio.h>
 #include <signal.h>
 
+#include "_env.h"
 #include "app.h"
 #include "task.h"
-
-#if defined(HW_GWS5K) && defined(USE_TPC)
-#include "gws5k.h"
-#endif
 
 
 int FLAG_SIG_EXIT = 0;
@@ -44,9 +41,9 @@ int  task(APP_CONF *app_conf)
 // set function pointer
 static void task_init(void)
 {
-#if defined(_HW_GWS5K) && defined(_HW_SPI)
-	task_core = &gws5k_run;
-	task_idle = &gws5k_idle;
+#if defined(_HW_GWS5K)
+	//task_core = &gws5k_run;
+	//task_idle = &gws5k_idle;
 #endif
 }
 
