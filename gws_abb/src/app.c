@@ -45,13 +45,15 @@ int main(int argc, char **argv)
 	signal(SIGCHLD, SIG_IGN);
 
 
+	// read & parse user cli input
 	int ret = 0;
-	char opt = 0;
 	APP_CONF app_conf;
 	memset(&app_conf, 0, sizeof(app_conf));
 
-	while((opt = getopt(argc, argv, "Dvhdi:")) != -1) {
-		switch(opt) {
+#ifdef USE_GETOPT
+	int c = 0;
+	while((c = getopt(argc, argv, "Dvhdi:")) != -1) {
+		switch(c) {
 		case 'i':
 			snprintf(app_conf.ifname, ABB_IFNAME_LENGTH, "%s", optarg);
 			break;
@@ -71,6 +73,65 @@ int main(int argc, char **argv)
 			break;
 		}
 	}
+#endif
+
+#ifdef USE_GETOPT_LONG
+
+	for(;;) {
+		int option_index = 0, c = 0;
+		static struct option long_options[] = {
+				{ "h", 			no_argument, 0, 0 },
+				{ "help", 		no_argument, 0, 0 },
+				{ "v", 			no_argument, 0, 0 },
+				{ "version", 	no_argument, 0, 0 },
+				{ "d", 			no_argument, 0, 0 },
+				{ "debug", 		no_argument, 0, 0 },
+				{ "D", 			no_argument, 0, 0 },
+				{ "daemon", 	no_argument, 0, 0 },
+				{ "i", 			required_argument, 0, 0 },
+				{ "ifname", 	required_argument, 0, 0 },
+				{ 0, 			no_argument, 0, 0 }
+		};
+
+		//c = getopt_long(argc, argv, "", long_options, &option_index);
+		c = getopt_long_only(argc, argv, "", long_options, &option_index);
+
+		// no more params
+		if (c == -1) break;
+
+		// unknown param
+		if (c == '?') continue;
+
+		// handle param
+		switch(option_index) {
+		case 0:
+		case 1:
+			app_conf.flag.help = 1;
+			return 0;
+			break;
+		case 2:
+		case 3:
+			app_conf.flag.version = 1;
+			return 0;
+			break;
+		case 4:
+		case 5:
+			app_conf.flag.debug = 1;
+			break;
+		case 6:
+		case 7:
+			app_conf.flag.daemon = 1;
+			break;
+		case 9:
+		case 10:
+			snprintf(app_conf.ifname, ABB_IFNAME_LENGTH, "%s", optarg);
+			break;
+		default: // running with default values
+			break;
+		}
+	}
+#endif
+
 
 	if (app_conf.flag.help) {
 		//app_version();
@@ -140,8 +201,8 @@ static void app_version(void)
 
 static void app_help(const char *app)
 {
-	//printf("  usage: %s [-D|--daemon] [-i|--ifname wlan0]\n", app);
-	//printf("         %s [-d|--debug] [-v|--version|--ver] [-h|--help]\n", app);
-	printf("  usage: %s [-D] [-i wlan0]\n", app);
-	printf("         %s [-d] [-v] [-h]\n", app);
+	printf("  usage: %s [-D|--daemon] [-i|--ifname ifname]\n", app);
+	printf("         %s [-d|--debug] [-v|--version|--ver] [-h|--help]\n", app);
+	//printf("  usage: %s [-D] [-i ifname]\n", app);
+	//printf("         %s [-d] [-v] [-h]\n", app);
 }
