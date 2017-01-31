@@ -1,0 +1,24 @@
+Rules of Linux C User Space Application Coding
+----------------------------------------------
+by Peter, Yu, Yaoyang & Qige.
+
+Only suitable for User Space Applications.
+
+1. Packages Naming: "gws_*" or "gws{N}k_*";
+	Eg. "gws_abb", "gws5k_radio".
+
+2. Library Function Naming: "{abb|gws}_*_{get|set}{_instant}()";
+	Eg. "abb_snr_get_instant()", "gws_txpwr_get()".
+
+3. Architecture
+User Application
+       |
+  Library API
+       |
+  ABB, Radio
+
+4. Hardware Independent
+	Package "gws{N}k_radio" will use function pointer to avoid
+	User Apps calling hardware directly.
+
+5. Data Interfaces between 
