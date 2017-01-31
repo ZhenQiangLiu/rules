@@ -1,0 +1,18 @@
+Package Names
+-------------
+
+1. GWS Analog Baseband
+	gws_abb: 
+		desc: WiFi related, wlan0, iwinfo, libiwinfo;
+		role: data collector.
+
+2. GWS Radio
+	gws5k_radio: 
+		desc: GWS5000 serial products;
+		role: data collector, radio controller.
+
+3. GWS App Library
+	libgws: 
+		desc: GWS App should all get/set data/value by this library;
+		role: middle ware that isolate apps from hardware.
+
