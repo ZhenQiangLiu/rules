@@ -3,7 +3,7 @@
  *
  *  Created on: Jul 25, 2016
  *  Updated on: 2016.11.11
- *  Updated on: Jan 31, 2017
+ *  Updated on: Jan 31, 2017 - Feb 1, 2017
  *      Author: Qige Zhao <qige@6harmonics.com>
  */
 
@@ -16,12 +16,14 @@ typedef unsigned char			uchar;
 typedef char					byte;
 typedef unsigned short 			ushort;
 
-
 #define APP_DESC				("GWS Analog Baseband")
 #define APP_VERSION				("v0.0.310117. Buildtime: "__DATE__", "__TIME__)
 
+
+// size define
 #define ABB_IFNAME_LENGTH		16
 
+// user input struct
 typedef struct {
 	struct {
 		int version;

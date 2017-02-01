@@ -8,7 +8,10 @@
  *      Author: Qige Zhao <qige@6harmonics.com>
  */
 #include <stdio.h>
+#include <unistd.h>
 #include <signal.h>
+
+#include <syslog.h>
 
 #include "_env.h"
 #include "app.h"
@@ -29,10 +32,13 @@ int  task(APP_CONF *app_conf)
 {
 	task_init();
 
-	//syslog();
+	int i = 0;
+	for(i = 0; i < 10; i ++) {
+		//(*task_core)(app_conf);
+		sleep(1);
+	}
 
-	(*task_core)(app_conf);
-	(*task_exit)();
+	//(*task_exit)();
 
 	return TASK_OK;
 }
@@ -41,7 +47,7 @@ int  task(APP_CONF *app_conf)
 // set function pointer
 static void task_init(void)
 {
-#if defined(_HW_GWS5K)
+#if defined(_RADIO_MODEL) && (_RADIO_MODEL == GWS5K)
 	//task_core = &gws5k_run;
 	//task_idle = &gws5k_idle;
 #endif
@@ -54,6 +60,7 @@ void task_prepare_exit(void)
 	printf("\n* SIGNAL caught, prepare to exit!\n");
 
 	// TODO: syslog() signal exit
+	LOG("signal(SIGINT, SIGQUIT, SIGTERM) detected, exiting...\n");
 	FLAG_SIG_EXIT = 1;
 
 	signal(SIGQUIT, SIG_DFL);

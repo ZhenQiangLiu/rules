@@ -3,7 +3,7 @@
  *
  *  Created on: Jul 25, 2016
  *  Updated on: Aug 6, 2016
- *  Updated on: Jan 31, 2017
+ *  Updated on: Jan 31, 2017 - Feb 1, 2017
  *      Author: Qige Zhao <qige@6harmonics.com>
  */
 
@@ -18,10 +18,11 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
+#include <syslog.h>
+
 #include <signal.h>
 
 #include "_env.h"
-
 #include "app.h"
 #include "task.h"
 
@@ -41,21 +42,26 @@ static void app_daemon(void);
 int main(int argc, char **argv)
 {
 	// release before interrupt/quit/terminated
+	DBG("handling signal(SIGINT, SIGQUIT, SIGTERM)\n");
 	signal(SIGINT, 	(__sighandler_t) task_prepare_exit); //+ "^C"
 	signal(SIGQUIT, (__sighandler_t) task_prepare_exit); //+ "^\"
 	signal(SIGTERM,	(__sighandler_t) task_prepare_exit); //+ "kill", not "kill -9"
 
 	// release zombies
 	// comment next line if "wait()/waitpid()"
+	DBG("handling signal(SIGCHLD): SIG_IGN\n");
 	signal(SIGCHLD, SIG_IGN);
 
 
 	// read & parse user cli input
 	int ret = 0;
+	const char *app = argv[0];
 	APP_CONF app_conf;
 	memset(&app_conf, 0, sizeof(app_conf));
 
 #ifdef USE_GETOPT
+	DBG("read command line params (getopt())\n");
+
 	// verified by Qige @ 2017.01.31
 	int c = 0;
 	while((c = getopt(argc, argv, "Dvhdi:")) != -1) {
@@ -82,6 +88,8 @@ int main(int argc, char **argv)
 #endif
 
 #ifdef USE_GETOPT_LONG
+	DBG("read command line params (getopt_long())\n");
+
 	// todo: verify in gdbserver
 	for(;;) {
 		int option_index = 0, c = 0;
@@ -139,9 +147,10 @@ int main(int argc, char **argv)
 #endif
 
 
+	DBG("check flags\n");
 	if (app_conf.flag.help) {
 		//app_version();
-		app_help(argv[0]);
+		app_help(app);
 		return 0;
 	}
 
@@ -155,9 +164,11 @@ int main(int argc, char **argv)
 	}
 
 	if (app_conf.flag.daemon) {
+		LOG("%s[%d]: daemon mode\n", app, getpid());
 		app_daemon();
 	}
 
+	LOG("%s[%d]: started\n", app, getpid());
 	ret = task(&app_conf);
 	return ret;
 }
@@ -189,9 +200,9 @@ static void app_daemon(void)
 		exit(1);
 	}
 	if ( fr > 0 ) {
-		fprintf(stderr, "forked to background (%d)\n", fr);
+		//fprintf(stderr, "forked to background (%d)\n", fr);
 		exit(0);
-}
+	}
 
 	umask(0);
 
