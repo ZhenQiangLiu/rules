@@ -10,18 +10,22 @@
 #ifndef APP_H_
 #define APP_H_
 
-// data types
-typedef unsigned int			uint;
-typedef unsigned char			uchar;
-typedef char					byte;
-typedef unsigned short 			ushort;
+#include "_gws.h"
+#include "_def.h"
+
 
 #define APP_DESC				("GWS Analog Baseband")
-#define APP_VERSION				("v0.0.310117. Buildtime: "__DATE__", "__TIME__)
+#define APP_VERSION				("v11.0.010217. Buildtime: "__DATE__", "__TIME__)
 
 
 // size define
+#define APP_NAME_LENGTH			16
+
+// ABB source is IWINFO
+#if (defined(_ABB_SRC) && (_ABB_SRC == IWINFO))
 #define ABB_IFNAME_LENGTH		16
+#endif
+
 
 // user input struct
 typedef struct {
@@ -31,7 +35,17 @@ typedef struct {
 		int debug;
 		int daemon;
 	} flag;
-	char ifname[ABB_IFNAME_LENGTH];
-} APP_CONF;
+	struct {
+		int pid;
+		char app[APP_NAME_LENGTH];
+		char key[GWS_APP_KEY_LENGTH];
+
+#if (defined(_ABB_SRC) && (_ABB_SRC == IWINFO))
+		int bw;
+		char ifname[ABB_IFNAME_LENGTH];
+#endif
+
+	} conf;
+} APP_ENV;
 
 #endif /* APP_H_ */

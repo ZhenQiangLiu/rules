@@ -41,45 +41,33 @@ static void app_daemon(void);
  */
 int main(int argc, char **argv)
 {
-	// release before interrupt/quit/terminated
-	DBG("handling signal(SIGINT, SIGQUIT, SIGTERM)\n");
-	signal(SIGINT, 	(__sighandler_t) task_prepare_exit); //+ "^C"
-	signal(SIGQUIT, (__sighandler_t) task_prepare_exit); //+ "^\"
-	signal(SIGTERM,	(__sighandler_t) task_prepare_exit); //+ "kill", not "kill -9"
-
-	// release zombies
-	// comment next line if "wait()/waitpid()"
-	DBG("handling signal(SIGCHLD): SIG_IGN\n");
-	signal(SIGCHLD, SIG_IGN);
-
-
 	// read & parse user cli input
 	int ret = 0;
 	const char *app = argv[0];
-	APP_CONF app_conf;
-	memset(&app_conf, 0, sizeof(app_conf));
+	APP_ENV env;
+	memset(&env, 0, sizeof(env));
 
 #ifdef USE_GETOPT
 	DBG("read command line params (getopt())\n");
 
 	// verified by Qige @ 2017.01.31
 	int c = 0;
-	while((c = getopt(argc, argv, "Dvhdi:")) != -1) {
+	while((c = getopt(argc, argv, "Dvhdi:b:k:")) != -1) {
 		switch(c) {
 		case 'i':
-			snprintf(app_conf.ifname, ABB_IFNAME_LENGTH, "%s", optarg);
+			snprintf(env.conf.ifname, ABB_IFNAME_LENGTH, "%s", optarg);
 			break;
 		case 'h':
-			app_conf.flag.help = 1;
+			env.flag.help = 1;
 			break;
 		case 'v':
-			app_conf.flag.version = 1;
+			env.flag.version = 1;
 			break;
 		case 'd':
-			app_conf.flag.debug = 1;
+			env.flag.debug = 1;
 			break;
 		case 'D':
-			app_conf.flag.daemon = 1;
+			env.flag.daemon = 1;
 			break;
 		default:
 			break;
@@ -120,25 +108,25 @@ int main(int argc, char **argv)
 		switch(option_index) {
 		case 0:
 		case 1:
-			app_conf.flag.help = 1;
+			env.flag.help = 1;
 			return 0;
 			break;
 		case 2:
 		case 3:
-			app_conf.flag.version = 1;
+			env.flag.version = 1;
 			return 0;
 			break;
 		case 4:
 		case 5:
-			app_conf.flag.debug = 1;
+			env.flag.debug = 1;
 			break;
 		case 6:
 		case 7:
-			app_conf.flag.daemon = 1;
+			env.flag.daemon = 1;
 			break;
 		case 9:
 		case 10:
-			snprintf(app_conf.ifname, ABB_IFNAME_LENGTH, "%s", optarg);
+			snprintf(env.conf.ifname, ABB_IFNAME_LENGTH, "%s", optarg);
 			break;
 		default: // running with default values
 			break;
@@ -148,28 +136,31 @@ int main(int argc, char **argv)
 
 
 	DBG("check flags\n");
-	if (app_conf.flag.help) {
+	if (env.flag.help) {
 		//app_version();
 		app_help(app);
 		return 0;
 	}
 
-	if (app_conf.flag.version) {
+	if (env.flag.version) {
 		app_version();
 		return 0;
 	}
 
-	if (app_conf.flag.debug) {
+	if (env.flag.debug) {
 		app_version();
 	}
 
-	if (app_conf.flag.daemon) {
-		LOG("%s[%d]: daemon mode\n", app, getpid());
+	env.conf.pid = getpid();
+	snprintf(env.conf.app, APP_NAME_LENGTH, "%s", app);
+	if (env.flag.daemon) {
 		app_daemon();
+		env.conf.pid = getpid();
+		LOG("running daemon (%s, pid=%d)\n", env.conf.app, env.conf.pid);
 	}
 
-	LOG("%s[%d]: started\n", app, getpid());
-	ret = task(&app_conf);
+	LOG("started (%s, pid=%d)\n", env.conf.app, env.conf.pid);
+	ret = Task(&env);
 	return ret;
 }
 
