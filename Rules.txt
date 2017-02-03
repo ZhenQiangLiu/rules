@@ -10,6 +10,23 @@ Only suitable for User Space Applications.
 2. Library Function Naming: "{abb|gws}_*_{get|set}{_instant}()";
 	Eg. "abb_snr_get_instant()", "gws_txpwr_get()".
 
+	2.1 If function is called internally, must declare it as "static";
+		And the function name should be lower case.
+
+	2.2 If function is called externally, must declear it in ".h" file;
+		And the function name should be Capitalized.
+
+	2.3 The return value should be int/ENUM values all the time, 
+		except "get_name()", "get_ssid()", etc.
+
+	2.4 The parameters that passing in for framework function,
+		like "function pointer", 
+		if it's a pointer, should be transfered to "void *";
+
+	2.5 All parameters should be reclaimed with internal arguments;
+
+	2.6 All arguments should be initialized right after claimed.
+
 3. Architecture
 User Application
        |
@@ -21,4 +38,8 @@ User Application
 	Package "gws{N}k_radio" will use function pointer to avoid
 	User Apps calling hardware directly.
 
-5. Data Interfaces between 
+5. Data Interfaces
+	5.1 Use "|" pipe;
+	5.2 Use "/tmp" or "/var" files;
+	5.3 Use "shm";
+	5.4 Use "msg".
