@@ -25,7 +25,9 @@ Only suitable for User Space Applications.
 
 	2.5 All parameters should be reclaimed with internal arguments;
 
-	2.6 All arguments should be initialized right after claimed.
+	2.6 All arguments should be initialized right after claimed；
+
+	2.7 Ｕse "static", "volatile", "const".
 
 3. Architecture
 User Application
